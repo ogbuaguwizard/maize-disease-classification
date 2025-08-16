@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { pipeline } from '@xenova/transformers';
+import { pipeline } from '@francis-ogbuagu/maize_vit_model';
 import { Upload, Camera, Leaf, AlertCircle } from 'lucide-react';
 import './App.css';
 
@@ -19,7 +19,7 @@ function App() {
       try {
         classifierRef.current = await pipeline(
           'image-classification',
-          'Xenova/francis-ogbuagu-maize_vit_model'
+          'francis-ogbuagu/maize_vit_model'
         );
       } catch (err) {
         console.error('Failed to initialize classifier:', err);
