@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { pipeline } from '@francis-ogbuagu/maize_vit_model';
+import { pipeline } from '@xenova/transformers';
 import { Upload, Camera, Leaf, AlertCircle } from 'lucide-react';
 import './App.css';
 
