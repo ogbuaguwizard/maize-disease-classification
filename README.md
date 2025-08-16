@@ -32,6 +32,7 @@ npm install
 
 ### 3. Add the ONNX model
 Place your ONNX model file as `public/maize_vit_model.onnx`.
+You can use this link `https://huggingface.co/francis-ogbuagu/maize_vit_model/resolve/main/maize_vit_model.onnx` in the create an InfereceSection.  **Warning:** Predictions will be slower.
 
 ### 4. Start the development server
 ```bash
