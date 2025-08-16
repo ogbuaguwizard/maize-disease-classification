@@ -1,0 +1,162 @@
+/* App.css - Maize Disease Detection Styling */
+
+.app {
+  font-family: 'Segoe UI', Arial, sans-serif;
+  background: #f6f8fa;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.app-header {
+  background: #1e293b;
+  color: #fff;
+  padding: 2rem 1rem 1rem 1rem;
+  text-align: center;
+  border-bottom-left-radius: 2rem;
+  border-bottom-right-radius: 2rem;
+}
+
+.header-icon {
+  color: #facc15;
+  width: 48px;
+  height: 48px;
+  margin-bottom: 0.5rem;
+}
+
+.main-content {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 2rem 1rem;
+}
+
+.upload-section {
+  background: #fff;
+  border-radius: 1.5rem;
+  box-shadow: 0 2px 16px rgba(30,41,59,0.08);
+  padding: 2rem;
+  max-width: 420px;
+  width: 100%;
+}
+
+.upload-card {
+  margin-bottom: 1.5rem;
+}
+
+.upload-options {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.upload-btn {
+  background: #facc15;
+  color: #1e293b;
+  border: none;
+  border-radius: 0.5rem;
+  padding: 0.5rem 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: background 0.2s;
+}
+.upload-btn:hover {
+  background: #fde047;
+}
+
+.image-preview {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+.image-preview img {
+  max-width: 100%;
+  max-height: 220px;
+  border-radius: 1rem;
+  box-shadow: 0 2px 8px rgba(30,41,59,0.10);
+}
+
+.predict-btn {
+  width: 100%;
+  background: #1e293b;
+  color: #fff;
+  border: none;
+  border-radius: 0.5rem;
+  padding: 0.75rem 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.predict-btn:disabled {
+  background: #64748b;
+  cursor: not-allowed;
+}
+.predict-btn:not(:disabled):hover {
+  background: #334155;
+}
+
+.error-message {
+  color: #dc2626;
+  background: #fee2e2;
+  border-radius: 0.5rem;
+  padding: 0.75rem 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  font-weight: 500;
+}
+
+.results-section {
+  margin-top: 1.5rem;
+}
+.predictions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+.prediction-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: #f1f5f9;
+  border-radius: 0.5rem;
+  padding: 0.5rem 1rem;
+}
+.label {
+  flex: 1;
+  font-weight: 600;
+  color: #1e293b;
+}
+.confidence-bar {
+  flex: 2;
+  background: #e5e7eb;
+  border-radius: 0.25rem;
+  height: 12px;
+  overflow: hidden;
+  margin-right: 0.5rem;
+}
+.confidence-fill {
+  background: #facc15;
+  height: 100%;
+  border-radius: 0.25rem;
+  transition: width 0.5s;
+}
+.score {
+  min-width: 48px;
+  text-align: right;
+  font-weight: 500;
+  color: #334155;
+}
+
+.app-footer {
+  text-align: center;
+  padding: 1rem;
+  color: #64748b;
+  font-size: 0.95rem;
+}

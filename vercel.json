@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "functions": {
+    "api/predict.js": {
+      "runtime": "nodejs18.x"
+    }
+  },
+  "env": {
+    "API_TOKEN": "@api-token"
+  }
+}
