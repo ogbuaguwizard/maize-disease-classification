@@ -1,1 +1,1 @@
-# maize-disease-prediction
+# maize-disease-classification
