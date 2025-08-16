@@ -5,9 +5,23 @@ export default defineConfig({
   plugins: [react()],
   build: {
     outDir: 'dist',
-    sourcemap: true
+    sourcemap: true,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          onnxruntime: ['onnxruntime-web']
+        }
+      }
+    }
   },
   server: {
-    port: 3000
+    port: 3000,
+    headers: {
+      'Cross-Origin-Embedder-Policy': 'require-corp',
+      'Cross-Origin-Opener-Policy': 'same-origin',
+    }
+  },
+  optimizeDeps: {
+    exclude: ['onnxruntime-web']
   }
 })

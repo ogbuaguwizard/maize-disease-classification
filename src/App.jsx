@@ -1,6 +1,9 @@
+
 import React, { useState, useRef } from 'react';
-import { pipeline } from '@xenova/transformers';
-import { Upload, Camera, Leaf, AlertCircle } from 'lucide-react';
+import * as ort from 'onnxruntime-web';
+import { Upload, Leaf, AlertCircle, Trash2 } from 'lucide-react';
+import { preprocessImage } from './preprocess';
+import { CLASS_LABELS } from './labels';
 import './App.css';
 
 function App() {
@@ -9,26 +12,36 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [modelLoading, setModelLoading] = useState(false);
+  const [firstLoad, setFirstLoad] = useState(false);
   const fileInputRef = useRef(null);
-  const classifierRef = useRef(null);
+  const sessionRef = useRef(null);
 
-  // Initialize the classifier
-  const initializeClassifier = async () => {
-    if (!classifierRef.current) {
+  // Initialize ONNX session
+  // Use IndexedDB caching for ONNX model
+  const initializeSession = async () => {
+    if (!sessionRef.current) {
       setModelLoading(true);
+      setFirstLoad(true);
       try {
-        classifierRef.current = await pipeline(
-          'image-classification',
-          'francis-ogbuagu/maize_vit_model'
-        );
+        // Enable WASM cache (IndexedDB)
+        ort.env.wasm.proxy = true;
+        ort.env.wasm.numThreads = 1;
+        const session = await ort.InferenceSession.create('/maize_vit_model.onnx', {
+          executionProviders: ['wasm'],
+          graphOptimizationLevel: 'all',
+          // Enable persistent caching
+          cacheEnabled: true
+        });
+        sessionRef.current = session;
       } catch (err) {
-        console.error('Failed to initialize classifier:', err);
-        throw new Error('Failed to load the model. Please refresh the page.');
+        console.error('Failed to initialize ONNX session:', err);
+        throw new Error('Failed to load the ONNX model. Please refresh the page.');
       } finally {
         setModelLoading(false);
+        setTimeout(() => setFirstLoad(false), 3000);
       }
     }
-    return classifierRef.current;
+    return sessionRef.current;
   };
 
   const handleImageUpload = (e) => {
@@ -55,22 +68,27 @@ function App() {
     setPredictions([]);
 
     try {
-      const classifier = await initializeClassifier();
-      
-      // Convert base64 to blob
-      const response = await fetch(image);
-      const blob = await response.blob();
-      
-      const predictions = await classifier(blob);
-      
-      if (predictions && predictions.length > 0) {
-        setPredictions(predictions.map(pred => ({
-          label: pred.label,
-          score: pred.score
-        })));
-      } else {
-        setError('No predictions could be made. Please try another image.');
-      }
+      const session = await initializeSession();
+      // Preprocess image to Float32Array
+      const inputTensor = await preprocessImage(image, [1, 3, 224, 224]);
+      const tensor = new ort.Tensor('float32', inputTensor, [1, 3, 224, 224]);
+      const feeds = { [session.inputNames[0]]: tensor };
+      const results = await session.run(feeds);
+      // Assume output is logits or probabilities
+      const output = results[session.outputNames[0]].data;
+      // Softmax if not already
+      const softmax = arr => {
+        const max = Math.max(...arr);
+        const exps = arr.map(x => Math.exp(x - max));
+        const sum = exps.reduce((a, b) => a + b, 0);
+        return exps.map(e => e / sum);
+      };
+      const scores = softmax(Array.from(output));
+      // Map to labels
+      const preds = scores.map((score, i) => ({ label: CLASS_LABELS[i] || `Class ${i}`, score }));
+      // Sort descending
+      preds.sort((a, b) => b.score - a.score);
+      setPredictions(preds);
     } catch (err) {
       console.error('Prediction error:', err);
       setError(err.message || 'Failed to analyze the image. Please try again.');
@@ -102,7 +120,7 @@ function App() {
       <header className="app-header">
         <Leaf className="header-icon" />
         <h1>Maize Disease Detection</h1>
-        <p>Powered by Transformers.js - Runs entirely in your browser</p>
+  <p>Powered by ONNX.js - Runs entirely in your browser</p>
       </header>
 
       <main className="main-content">
@@ -126,7 +144,7 @@ function App() {
                 <div className="image-preview">
                   <img src={image} alt="Uploaded maize leaf" />
                   <button 
-                    className="remove-image"
+                    className="remove-image-btn"
                     onClick={() => {
                       setImage(null);
                       setPredictions([]);
@@ -136,7 +154,7 @@ function App() {
                       }
                     }}
                   >
-                    Remove Image
+                    <Trash2 size={16} style={{marginRight:4,marginBottom:-2}} /> Remove Image
                   </button>
                 </div>
               ) : (
@@ -144,7 +162,7 @@ function App() {
                   <Upload size={48} className="upload-icon" />
                   <p>Drag & drop an image here or click to browse</p>
                   <button 
-                    className="upload-button"
+                    className="choose-image-btn"
                     onClick={() => fileInputRef.current?.click()}
                   >
                     Choose Image
@@ -155,13 +173,20 @@ function App() {
           </div>
 
           {image && (
-            <button 
-              className="predict-button"
-              onClick={handlePredict}
-              disabled={loading || modelLoading}
-            >
-              {loading ? 'Analyzing...' : modelLoading ? 'Loading Model...' : 'Analyze Image'}
-            </button>
+            <>
+              <button 
+                className="analyze-btn"
+                onClick={handlePredict}
+                disabled={loading || modelLoading}
+              >
+                {loading ? 'Analyzing...' : modelLoading ? 'Loading Model...' : 'Analyze Image'}
+              </button>
+              {firstLoad && (
+                <div style={{color:'#b45309',background:'#fef3c7',borderRadius:'0.5rem',padding:'0.7rem 1rem',marginBottom:'1rem',fontWeight:500}}>
+                  First time analysis may take up to a minute as the model loads. Subsequent predictions will be much faster.
+                </div>
+              )}
+            </>
           )}
 
           {error && (
@@ -194,7 +219,7 @@ function App() {
       </main>
 
       <footer className="app-footer">
-        <p>Built with React and Transformers.js - No server required</p>
+  <p>Built with React and ONNX.js - No server required</p>
       </footer>
     </div>
   );
