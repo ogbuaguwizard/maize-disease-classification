@@ -25,6 +25,7 @@ function App() {
       try {
         ort.env.wasm.proxy = true;
         ort.env.wasm.numThreads = 1;
+        ort.env.wasm.wasmPaths = '/'; // Set the path for WASM files
         // Try to load model from IndexedDB
         let modelArrayBuffer = await loadModelFromIndexedDB();
         if (!modelArrayBuffer) {
