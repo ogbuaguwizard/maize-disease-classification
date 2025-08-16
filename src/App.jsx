@@ -25,12 +25,15 @@ function App() {
       try {
         ort.env.wasm.proxy = true;
         ort.env.wasm.numThreads = 1;
-        ort.env.wasm.wasmPaths = '/ort/'; // Set the path for WASM files
+        // ort.env.wasm.wasmPaths = '/ort/'; // Set the path for WASM files
+        ort.env.wasm.wasmPaths = 'https://cdn.jsdelivr.net/npm/onnxruntime-web@latest/dist/'; // Use CDN for WASM files
+
         // Try to load model from IndexedDB
         let modelArrayBuffer = await loadModelFromIndexedDB();
         if (!modelArrayBuffer) {
           showFirstLoadMsg = true;
           setFirstLoad(true);
+          // const response = await fetch('https://huggingface.co/francis-ogbuagu/maize_vit_model/resolve/main/maize_vit_model.onnx'); // Use the Hugging Face model
           const response = await fetch('/maize_vit_model.onnx');
           modelArrayBuffer = await response.arrayBuffer();
           await saveModelToIndexedDB(modelArrayBuffer);
