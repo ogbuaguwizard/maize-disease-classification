@@ -1,6 +1,6 @@
-
 import React, { useState, useRef } from 'react';
 import * as ort from 'onnxruntime-web';
+import { saveModelToIndexedDB, loadModelFromIndexedDB } from './modelCache';
 import { Upload, Leaf, AlertCircle, Trash2 } from 'lucide-react';
 import { preprocessImage } from './preprocess';
 import { CLASS_LABELS } from './labels';
@@ -21,16 +21,22 @@ function App() {
   const initializeSession = async () => {
     if (!sessionRef.current) {
       setModelLoading(true);
-      setFirstLoad(true);
+      let showFirstLoadMsg = false;
       try {
-        // Enable WASM cache (IndexedDB)
         ort.env.wasm.proxy = true;
         ort.env.wasm.numThreads = 1;
-        const session = await ort.InferenceSession.create('/maize_vit_model.onnx', {
+        // Try to load model from IndexedDB
+        let modelArrayBuffer = await loadModelFromIndexedDB();
+        if (!modelArrayBuffer) {
+          showFirstLoadMsg = true;
+          setFirstLoad(true);
+          const response = await fetch('/maize_vit_model.onnx');
+          modelArrayBuffer = await response.arrayBuffer();
+          await saveModelToIndexedDB(modelArrayBuffer);
+        }
+        const session = await ort.InferenceSession.create(modelArrayBuffer, {
           executionProviders: ['wasm'],
           graphOptimizationLevel: 'all',
-          // Enable persistent caching
-          cacheEnabled: true
         });
         sessionRef.current = session;
       } catch (err) {
@@ -38,7 +44,9 @@ function App() {
         throw new Error('Failed to load the ONNX model. Please refresh the page.');
       } finally {
         setModelLoading(false);
-        setTimeout(() => setFirstLoad(false), 3000);
+        if (showFirstLoadMsg) {
+          setTimeout(() => setFirstLoad(false), 3000);
+        }
       }
     }
     return sessionRef.current;
