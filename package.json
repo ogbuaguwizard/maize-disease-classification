@@ -6,7 +6,8 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "deploy": "vercel --prod"
+    "deploy": "vercel --prod",
+    "postinstall": "git lfs pull"
   },
   "dependencies": {
     "react": "^18.2.0",
