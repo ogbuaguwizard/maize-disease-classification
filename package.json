@@ -7,7 +7,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "deploy": "vercel --prod",
-    "postinstall": "git lfs pull"
+    "postinstall": "./scripts/fetch-lfs.sh"
   },
   "dependencies": {
     "react": "^18.2.0",
