@@ -1,1 +1,2 @@
 *.onnx filter=lfs diff=lfs merge=lfs -text
+public/maize_vit_model.onnx filter=lfs diff=lfs merge=lfs -text
